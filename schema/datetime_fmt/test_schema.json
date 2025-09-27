@@ -36,7 +36,7 @@
            "type": "number"
          },
          "options": {
-           "description": "Formatting paramters for date / time, similar to ECMAScript Intl's options bag",
+           "description": "Formatting parameters for date / time, similar to ECMAScript Intl's options bag",
            "type": "object",
            "properties": {
              "calendar": {

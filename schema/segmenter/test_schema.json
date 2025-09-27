@@ -83,7 +83,7 @@
            "type": "string"
          },
          "options": {
-           "description": "Formatting paramters for the number",
+           "description": "Formatting parameters for the number",
            "type": "object",
            "properties": {
              "granularity": {
