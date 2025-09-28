@@ -45,8 +45,8 @@ const skeleton_to_options_map = new Map(
 
       ['h', {'hourCycle': 'h12', 'hour': 'numeric'} ],
       ['hh', {'hourCycle': 'h12', 'hour': '2-digit'} ],
-      ['H', {'hourCycle': 'h24', 'hour': 'numeric'} ],
-      ['HH', {'hourCycle': 'h24', 'hour': '2-digit'} ],
+      ['H', {'hourCycle': 'h23', 'hour': 'numeric'} ],
+      ['HH', {'hourCycle': 'h23', 'hour': '2-digit'} ],
 
       ['j', {'hour': 'numeric'} ],
       ['jj', {'hour': '2-digit'} ],
@@ -122,8 +122,10 @@ module.exports = {
       }
 
       test_options = fill_options_from_skeleton_parts(split);
-      if (debug > 0) {
-        console.log('# TEST_OPTIONS: %s', split, test_options);
+
+      // This may be specified explicitly in options.
+      if ('hourCycle' in input_options) {
+        test_options['hourCycle'] = input_options['hourCycle'];
       }
     }
 
@@ -167,6 +169,25 @@ module.exports = {
     }
     if ('dateStyle' in input_options) {
       test_options['dateStyle'] = input_options['dateStyle'];
+    }
+
+    if ('dateTimeFormatType' in input_options &&
+        input_options['dateTimeFormatType'] == 'standard') {
+      return_json['error_type'] = 'unsupported';
+      return_json['error_detail'] = 'dateTimeFormatType: ' +
+          input_options['dateTimeFormatType'];
+        return_json['unsupported'] = 'format type';
+        return return_json;
+    }
+
+    if ('semanticSkeleton' in input_options) {
+      // Check for known issue when format output should give only the time zone.
+      if (input_options['semanticSkeleton'] == 'Z') {
+        return_json['error'] = 'unsupported';
+        return_json['error_detail'] = 'Requested timezone without date or time';
+        return_json['unsupported'] = 'timezone only';
+        return return_json;
+      }
     }
 
     let calendar;
