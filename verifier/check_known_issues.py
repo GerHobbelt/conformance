@@ -62,6 +62,7 @@ class knownIssueType(Enum):
     datetime_semantic_Z = 'NodeJS always includes date or time'
 
     datetime_GMT_UTC = 'UTC instead of GMT'
+    datetime_TZ_name = 'Using different names of timezone'
 
     # Likely Subtags
     likely_subtags_sr_latn = "sr_latin becoming en"
@@ -107,6 +108,7 @@ def diff_ascii_space_vs_nbsp(actual, expected_value):
     # Found in datetime testing.
     if not expected_value or not actual:
         return None
+
 
     # Normalizing all NBSP spaces to ASCII in both to check if the type of space
     # is the only difference in formatted output.
@@ -207,6 +209,21 @@ def dt_inserted_comma(actual, expected):
 
 def dt_gmt_utc(actual, expected):
     # The difference may also include NBSP vs ASCII space
+    new_expected = expected.replace(NBSP, SP).replace(',', '')
+    new_actual = actual.replace(NBSP, SP).replace(' at', '').replace(',', '')
+
+    # Variant followed by standard
+    variations = [
+        ('UTC', 'GMT'),
+        ('Coordinated Universal Time', 'Greenwich Mean Time'),
+        ('توقيت غرينتش', 'التوقيت العالمي المنسق'),  # Arabic
+        ('เวลาสากลเชิงพิกัด', 'เวลามาตรฐานกรีนิช'),  # Thai
+        ('協定世界時', 'グリニッジ標準時'),  # Japanese
+    ]
+
+    for variation in variations:
+        if new_actual.find(variation[0]) >= 0 and new_actual.replace(variation[0], variation[1]) == new_expected:
+            return knownIssueType.datetime_GMT_UTC
     new_expected = expected.replace(NBSP, SP)
     new_actual = actual.replace(NBSP, SP)
 
@@ -232,8 +249,10 @@ def check_datetime_known_issues(test, platform_info):
         input_data = test.get('input_data')
 
         # Perform each test, computing matches with known issues by means of the functions in this list
-        check_fns = [dt_gmt_utc, diff_nbsp_vs_ascii_space, diff_ascii_space_vs_nbsp, numerals_replaced_by_another_numbering_system,
-                  dt_check_arabic_comma, dt_inserted_comma, dt_check_for_alternate_long_form]
+        check_fns = [dt_gmt_utc, diff_nbsp_vs_ascii_space, diff_ascii_space_vs_nbsp,
+                     numerals_replaced_by_another_numbering_system,
+                     dt_check_arabic_comma, dt_inserted_comma, dt_check_for_alternate_long_form]
+
         for check_fn in check_fns:
             is_ki = check_fn(result, expected)
             if is_ki:
@@ -426,7 +445,7 @@ def compute_known_issues_for_single_test(test_type, test, platform_info):
     known_issue_found = False
     if test_type == ddt_data.testType.collation.value:
         known_issue_found = check_collation_issues(test, platform_info)
-    if test_type == ddt_data.testType.datetime_fmt.value:
+    elif test_type == ddt_data.testType.datetime_fmt.value:
         known_issue_found = check_datetime_known_issues(test, platform_info)
     elif test_type == ddt_data.testType.rdt_fmt.value:
         known_issue_found = check_rdt_known_issues(test, platform_info)
