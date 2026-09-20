@@ -13,9 +13,9 @@ logrotate -s logrotate.state logrotate.conf
 ##########
 
 export NVM_DIR=$HOME/.nvm;
-source $NVM_DIR/nvm.sh;
+. $NVM_DIR/nvm.sh;
 
-export RUSTUP_TOOLCHAIN=1.83
+export RUSTUP_TOOLCHAIN=1.87
 
 #
 # Setup
@@ -105,7 +105,7 @@ echo "Created $TEMP_DIR/testOutput"
 pushd testdriver
 
 # Set to use NVM
-source "$HOME/.nvm/nvm.sh"
+. "$HOME/.nvm/nvm.sh"
 
 echo "RUNNING FROM $source_file"
 

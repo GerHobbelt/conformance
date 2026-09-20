@@ -21,7 +21,7 @@ logrotate -s logrotate.state logrotate.conf
   sleep 30
 done) &
 MONITOR_PID=$!
-trap 'kill $MONITOR_PID 2>/dev/null' EXIT
+trap 'kill $MONITOR_PID 2>/dev/null || true' EXIT
 
 ##########
 # Setup (generate) test data & expected values
@@ -48,7 +48,7 @@ export NVM_DIR=$HOME/.nvm
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-export RUSTUP_TOOLCHAIN=1.83
+export RUSTUP_TOOLCHAIN=1.87
 
 if [[ $CI == "true" ]] && ! [ -x "$(command -v nvm)" ]
 then
